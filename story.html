@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Story</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #1e1e1e;
+            color: #00FF00;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-image: url('https://www.transparenttextures.com/patterns/black-linen.png');
+            background-size: cover;
+            position: relative;
+        }
+
+        .story-container {
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            padding: 20px;
+            width: 80%;
+            margin: 50px auto;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            color: #00FF00;
+            text-align: left;
+            font-size: 18px;
+            line-height: 1.5;
+            overflow: auto;
+        }
+
+        #choices-container {
+            margin-top: 20px;
+        }
+
+        .choice-btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .choice-btn:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .choice-btn:active {
+            background-color: #388E3C;
+            transform: scale(0.95);
+        }
+
+        #restart-btn {
+            display: none;
+            margin-top: 20px;
+            background-color: #f44336;
+        }
+
+        #restart-btn:hover {
+            background-color: #e53935;
+        }
+
+        @keyframes glitch {
+            0% {
+                text-shadow: -2px -2px 0 #ff0000, 2px 2px 0 #00ff00;
+            }
+            50% {
+                text-shadow: -2px -2px 0 #00ff00, 2px 2px 0 #ff0000;
+            }
+            100% {
+                text-shadow: -2px -2px 0 #ff0000, 2px 2px 0 #00ff00;
+            }
+        }
+
+        .glitch-text {
+            animation: glitch 1s infinite;
+            position: relative;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="story-container" id="story-container">
+    <p id="story-text"></p>
+    <div class="choices" id="choices-container"></div>
+    <button id="restart-btn" class="choice-btn" onclick="restartStory()">Restart Story</button>
+</div>
+<script>
+// Story
+const storyPages = {
+    1: {
+        text: "Don’t be alarmed. We have temporary access of your computer. Once you started this application, you obtained a new identity. You are now a member of the FBI agency. You have been picked randomly, and that is exactly what this mission needs: someone undetectible from the next. You have two choices:",
+        choices: {
+            1: { text: "Accept this mission", nextPage: 2 },
+            2: { text: "Decline offer", nextPage: 3 }
+        }
+    },
+    2: {
+        text: "Congratulations, you have accepted the mission. Please advise that a number will now be calling you with further details.\n\n***Ring Ring***\n\n“Hello?”\n“Your new identification papers and mission details are located under the floorboard right in front the door. Goodbye.”",
+        choices: {
+            1: { text: "Call 911", nextPage: 4 },
+            2: { text: "Go find papers", nextPage: 5 }
+        }
+    },
+    3: {
+        text: "You have just lost your opportunity to earn $100k. Return to your daily living.",
+        choices: null
+    },
+    4: {
+        text: "***Ring Ring***\n\n“Hello?”\n“Hello this is 911, what is your emergency?”\n“Someone just hacked into my computer then called me telling me that they broke into my house and put things under a floorboard.”\n“Remain calm sir… we will have police on the way shortly.”\n\nSoon after you hang up, you see your screen light up again. You go over to read it: “You have terminated mission agreements.”",
+        choices: null
+    },
+    5: {
+        text: "You head over to the front door and get down on your hands and knees to feel the edges of the floorboards. Once feels slightly loose. You lift it up and see a passport, ID card, and an envelope with nothing written on it. You grab the envelope first and only see two words: June’s Place. You have work starting in 2 hours.",
+        choices: {
+            1: { text: "Head to June’s Place and call sick out of work.", nextPage: 6 },
+            2: { text: "Head to work then head to June’s place.", nextPage: 6 }
+        }
+    },
+    6: {
+        text: "Story to be continued…",
+        choices: null
+    }
+};
+
+let currentPage = 1;
+
+// Renders page function
+function renderPage(pageNumber) {
+    const page = storyPages[pageNumber];
+    const storyText = document.getElementById("story-text");
+    const choicesContainer = document.getElementById("choices-container");
+
+    try {
+        if (!page) throw new Error("Page not found!");
+        
+        storyText.textContent = page.text;  // Display the page text
+        choicesContainer.innerHTML = "";    // Clear previous choices
+
+        if (page.choices) {
+            // Create buttons for each choice
+            for (const [key, choice] of Object.entries(page.choices)) {
+                const button = document.createElement("button");
+                button.textContent = choice.text;
+                button.className = "choice-btn";
+                button.onclick = () => handleChoice(choice.nextPage);  // Set up button click
+                choicesContainer.appendChild(button);
+            }
+        } else {
+            const restartBtn = document.getElementById("restart-btn");
+            restartBtn.style.display = "inline-block";  // Show the restart button when no more choices
+        }
+    } catch (error) {
+        console.error("Error while rendering the page:", error.message);
+        alert("An error occurred while loading the story. Please try again later.");
+    }
+}
+
+// Handle choice made by user
+function handleChoice(nextPage) {
+    try {
+        if (!nextPage) throw new Error("Invalid next page value!");
+        currentPage = nextPage;
+        renderPage(currentPage);  // Load the next page
+    } catch (error) {
+        console.error("Error while handling choice:", error.message);
+        alert("An error occurred while processing your choice. Please try again.");
+    }
+}
+
+// Restart story function
+function restartStory() {
+    currentPage = 1;
+    document.getElementById("restart-btn").style.display = "none";  // Hide the restart button
+    renderPage(currentPage);  // Restart from the beginning
+}
+
+// Start the story
+renderPage(currentPage);
+</script>
+
+</body>
+</html>
